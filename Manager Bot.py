@@ -42,15 +42,15 @@ EVENTS
 async def on_ready():
     global welcome_channel_id, ban_channel_id, default_role_id, prohibited_words, warns
     
-    database.initialize()
+    await database.initialize()
 
     for guild in bot.guilds:
-        database.new_guild(guild.id)
-        welcome_channel_id = database.fetch_welcome(guild.id)
-        ban_channel_id = database.fetch_ban(guild.id)
-        default_role_id = database.fetch_role(guild.id)
-        prohibited_words = database.fetch_words(guild.id)
-        warns = database.fetch_warns(guild.id)
+        await database.new_guild(guild.id)
+        welcome_channel_id = await database.fetch_welcome(guild.id)
+        ban_channel_id = await database.fetch_ban(guild.id)
+        default_role_id = await database.fetch_role(guild.id)
+        prohibited_words = await database.fetch_words(guild.id)
+        warns = await database.fetch_warns(guild.id)
 
     print("Bot succesfully initialized!")
 
@@ -100,7 +100,7 @@ async def on_member_unban(guild:discord.Guild, member:discord.Member):
         return
 
     try:
-        await member.send(f"📬 Mensagem do servidor {guild.name}:\nCongratulations! You have been unbanned!")
+        await member.send(f"📬 Message from the guild {guild.name}:\nCongratulations! You have been unbanned!")
     except:
         print("It was not possible to send the unban message...")
 
@@ -179,7 +179,7 @@ async def set_welcome_channel(ctx:commands.Context):
     global welcome_channel_id
 
     # Adding to the database
-    database.set_welcome_channel(ctx.guild.id, ctx.channel.id)
+    await database.set_welcome_channel(ctx.guild.id, ctx.channel.id)
 
     welcome_channel_id = ctx.channel.id
     await ctx.send("The channel was succesfully chosen as the welcome channel!")
@@ -191,7 +191,7 @@ async def set_ban_channel(ctx:commands.Context):
     global ban_channel_id
 
     # Adding to the database
-    database.set_ban_channel(ctx.guild.id, ctx.channel.id)
+    await database.set_ban_channel(ctx.guild.id, ctx.channel.id)
 
     ban_channel_id = ctx.channel.id
     await ctx.send("The channel was succesfully chosen as the ban channel!")
@@ -286,14 +286,14 @@ async def generate_guild_pre_set(ctx:commands.Context):
     #assigning the welcome channel
     welcome = await guild.create_text_channel("welcome", category=first_category)
     welcome_channel_id = welcome.id
-    database.set_welcome_channel(guild.id, welcome.id) # Adding to the database
+    await database.set_welcome_channel(guild.id, welcome.id) # Adding to the database
 
     await guild.create_text_channel("general", category=first_category)
 
     #assigning the ban channel
     ban = await guild.create_text_channel("bans", category=first_category)
     ban_channel_id = ban.id
-    database.set_ban_channel(guild.id, ban.id) # Adding to the database
+    await database.set_ban_channel(guild.id, ban.id) # Adding to the database
 
     #creating voice channels
     second_category = await guild.create_category("Voice Channels")
@@ -311,7 +311,7 @@ async def generate_guild_pre_set(ctx:commands.Context):
     #creating roles for the members
     default_role = await guild.create_role(name='beginner', permissions=beginner_permissions, colour=discord.Colour.green())
     default_role_id = default_role.id
-    database.set_default_role(guild.id, default_role.id) # Adding to the database
+    await database.set_default_role(guild.id, default_role.id) # Adding to the database
 
     await guild.create_role(name='intermediate', permissions=beginner_permissions, colour=discord.Colour.blue())
     await guild.create_role(name='advanced', permissions=advanced_permissions, colour=discord.Colour.red())
@@ -332,7 +332,7 @@ adding commands
 async def add_prohibited_word(ctx, prohibited:str):
     global prohibited_words
 
-    database.new_prohibited_word(ctx.guild.id, prohibited.lower())
+    await database.new_prohibited_word(ctx.guild.id, prohibited.lower())
 
     prohibited_words.append(prohibited.lower())
     await ctx.send("the word was added with success!")
